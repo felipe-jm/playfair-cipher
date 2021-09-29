@@ -44,7 +44,7 @@ def preparar_mensagem(mensagem):
             if caracter == mensagem[proximo_caracter]:
                 mensagem.insert(proximo_caracter, 'x')
 
-    # Como a cifra é realizada de acordo com 2 letras juntas, não
+    # Como a cifra é realizada de acordo com duas letras juntas, não
     # se pode ter um número ímpar de letras, por isso deve-se adicionar um
     # 'x' após última letra
     if len(mensagem) % 2 != 0:
@@ -73,7 +73,7 @@ def cifrar(mensagem, tabela_cifra):
 
     counter = 0
 
-    while counter <= len(mensagem):
+    while counter < len(mensagem):
         caracter_atual = mensagem[counter]
         proximo_caracter = mensagem[counter + 1]
 

@@ -42,30 +42,64 @@ def preparar_mensagem(mensagem):
         proximo_caracter = i + 1
         if proximo_caracter < len(mensagem):
             if caracter == mensagem[proximo_caracter]:
-                mensagem.insert(proximo_caracter, 'X')
+                mensagem.insert(proximo_caracter, 'x')
+
+    # Como a cifra é realizada de acordo com 2 letras juntas, não
+    # se pode ter um número ímpar de letras, por isso deve-se adicionar um
+    # 'x' após última letra
+    if len(mensagem) % 2 != 0:
+        mensagem.append('x')
 
     return mensagem
 
 
 def preparar_tabela_cifra(alfabeto):
+    alfabeto = alfabeto.lower()
     tabela_cifra = alfabeto.split(' ')
     tabela_cifra = np.array_split(tabela_cifra, 5)
     return tabela_cifra
 
 
 def achar_localizacao_caracter(caracter, tabela_cifra):
-    for i in range(3):
+    for i in range(5):
         for j in range(5):
-            print(i, j)
-            print(tabela_cifra[i][j])
+            if caracter == tabela_cifra[i][j]:
+                return {"linha": i, "coluna": j}
 
 
 def cifrar(mensagem, tabela_cifra):
-    # print('mensagem', mensagem)
-    # print('tabela_cifra', tabela_cifra)
+    print(mensagem)
+    print(tabela_cifra)
 
-    for index, caracter in mensagem:
-        localizacao_caracter_tabela = achar_localizacao_caracter(caracter)
+    counter = 0
+
+    while counter <= len(mensagem):
+        caracter_atual = mensagem[counter]
+        proximo_caracter = mensagem[counter + 1]
+
+        print('caracter_atual', caracter_atual)
+        print('proximo_caracter', proximo_caracter)
+
+        localizacao_caracter_atual = achar_localizacao_caracter(
+            caracter_atual, tabela_cifra
+        )
+
+        localizacao_proximo_caracter = achar_localizacao_caracter(
+            proximo_caracter, tabela_cifra
+        )
+
+        print('localizacao_caracter_atual', localizacao_caracter_atual)
+        print('localizacao_proximo_caracter', localizacao_proximo_caracter)
+
+        # Execução das regras da cifra de Playfair
+        if localizacao_caracter_atual['linha'] == localizacao_proximo_caracter['linha']:
+            print('Executa primeira regra')
+        elif localizacao_caracter_atual['coluna'] == localizacao_proximo_caracter['coluna']:
+            print('Executa segunda regra')
+        else:
+            print('Executa terceira regra')
+
+        counter += 2
 
 
 def requisitar_escolha():

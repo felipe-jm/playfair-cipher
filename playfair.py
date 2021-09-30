@@ -31,6 +31,12 @@ import numpy as np
 
 escolha_disponiveis = [1, 2, 3, 4, 5, 6]
 
+PRIMEIRA_COLUNA = 0
+ULTIMA_COLUNA = 4
+
+PRIMEIRA_LINHA = 0
+ULTIMA_LINHA = 4
+
 
 def preparar_mensagem(mensagem):
     mensagem = mensagem.lower()
@@ -67,39 +73,157 @@ def achar_localizacao_caracter(caracter, tabela_cifra):
                 return {"linha": i, "coluna": j}
 
 
-def cifrar(mensagem, tabela_cifra):
-    print(mensagem)
-    print(tabela_cifra)
+def achar_proxima_letra_linha(linha, coluna, tabela_cifra, decifrar=False):
+    operacao = -1 if decifrar else 1
+    coluna_limite = PRIMEIRA_COLUNA if decifrar else ULTIMA_COLUNA
+    proxima_coluna = ULTIMA_COLUNA if decifrar else PRIMEIRA_COLUNA
 
+    if coluna != coluna_limite:
+        # Letra no meio da matriz (andar uma coluna para a direita)
+        proxima_letra = tabela_cifra[linha][coluna + operacao]
+    else:
+        # Letra na última coluna (ir para coluna inicial ou final)
+        proxima_letra = tabela_cifra[linha][proxima_coluna]
+
+    return proxima_letra
+
+
+def achar_proxima_letra_coluna(linha, coluna, tabela_cifra, decifrar=False):
+    operacao = -1 if decifrar else 1
+    linha_limite = PRIMEIRA_LINHA if decifrar else ULTIMA_LINHA
+    proxima_linha = ULTIMA_LINHA if decifrar else PRIMEIRA_LINHA
+
+    if linha != linha_limite:
+        # Letra no meio da matriz (andar uma coluna para a direita)
+        proxima_letra = tabela_cifra[linha + operacao][coluna]
+    else:
+        # Letra na última linha (ir para linha inicial ou final)
+        proxima_letra = tabela_cifra[proxima_linha][coluna]
+
+    return proxima_letra
+
+
+def formatar_mensagem_cifrada(mensagem):
+    mensagem_final = ''
     counter = 0
-
     while counter < len(mensagem):
-        caracter_atual = mensagem[counter]
-        proximo_caracter = mensagem[counter + 1]
+        letra1 = mensagem[counter]
+        letra2 = mensagem[counter + 1]
+        letra3 = mensagem[counter + 2]
+        letra4 = mensagem[counter + 3]
 
-        print('caracter_atual', caracter_atual)
-        print('proximo_caracter', proximo_caracter)
+        mensagem_final += f'{letra1}{letra2}{letra3}{letra4}'
 
-        localizacao_caracter_atual = achar_localizacao_caracter(
-            caracter_atual, tabela_cifra
-        )
+        mensagem_final = mensagem_final.upper()
 
-        localizacao_proximo_caracter = achar_localizacao_caracter(
-            proximo_caracter, tabela_cifra
-        )
+        mensagem_final += ' '
 
-        print('localizacao_caracter_atual', localizacao_caracter_atual)
-        print('localizacao_proximo_caracter', localizacao_proximo_caracter)
+        counter += 4
 
-        # Execução das regras da cifra de Playfair
-        if localizacao_caracter_atual['linha'] == localizacao_proximo_caracter['linha']:
-            print('Executa primeira regra')
-        elif localizacao_caracter_atual['coluna'] == localizacao_proximo_caracter['coluna']:
-            print('Executa segunda regra')
-        else:
-            print('Executa terceira regra')
+    return mensagem_final
+
+
+def formatar_mensagem_decifrada(mensagem):
+    mensagem_final = ''
+    counter = 0
+    while counter < len(mensagem):
+        letra1 = mensagem[counter]
+        letra2 = mensagem[counter + 1]
+
+        mensagem_final += f'{letra1}{letra2}'
+
+        mensagem_final = mensagem_final.upper()
+
+        mensagem_final += ' '
 
         counter += 2
+
+    return mensagem_final
+
+
+def cifrar(mensagem, tabela_cifra, decifrar=False):
+    counter = 0
+
+    mensagem_cifrada = mensagem
+
+    while counter < len(mensagem):
+        primeiro_caracter = mensagem[counter]
+        segundo_caracter = mensagem[counter + 1]
+
+        localizacao_primeiro_caracter = achar_localizacao_caracter(
+            primeiro_caracter, tabela_cifra
+        )
+
+        localizacao_segundo_caracter = achar_localizacao_caracter(
+            segundo_caracter, tabela_cifra
+        )
+
+        linha_primeiro_caracter = localizacao_primeiro_caracter['linha']
+        coluna_primeiro_caracter = localizacao_primeiro_caracter['coluna']
+
+        linha_segundo_caracter = localizacao_segundo_caracter['linha']
+        coluna_segundo_caracter = localizacao_segundo_caracter['coluna']
+
+        # Execução das regras da cifra de Playfair
+        if linha_primeiro_caracter == linha_segundo_caracter:
+            # Primeira regra
+            proxima_letra_primeiro_caracter = achar_proxima_letra_linha(
+                linha_primeiro_caracter,
+                coluna_primeiro_caracter,
+                tabela_cifra,
+                decifrar=decifrar
+            )
+
+            mensagem_cifrada[counter] = proxima_letra_primeiro_caracter
+
+            proxima_letra_segundo_caracter = achar_proxima_letra_linha(
+                linha_segundo_caracter,
+                coluna_segundo_caracter,
+                tabela_cifra,
+                decifrar=decifrar
+            )
+
+            mensagem_cifrada[counter + 1] = proxima_letra_segundo_caracter
+
+        elif coluna_primeiro_caracter == coluna_segundo_caracter:
+            # Segunda regra
+            proxima_letra_primeiro_caracter = achar_proxima_letra_coluna(
+                linha_primeiro_caracter,
+                coluna_primeiro_caracter,
+                tabela_cifra,
+                decifrar=decifrar
+            )
+
+            mensagem_cifrada[counter] = proxima_letra_primeiro_caracter
+
+            proxima_letra_segundo_caracter = achar_proxima_letra_coluna(
+                linha_segundo_caracter,
+                coluna_segundo_caracter,
+                tabela_cifra,
+                decifrar=decifrar
+            )
+
+            mensagem_cifrada[counter + 1] = proxima_letra_segundo_caracter
+
+        else:
+            # Terceira regra
+            proxima_letra_primeiro_caracter = tabela_cifra[linha_primeiro_caracter][coluna_segundo_caracter]
+
+            proxima_letra_segundo_caracter = tabela_cifra[linha_segundo_caracter][coluna_primeiro_caracter]
+
+            mensagem_cifrada[counter] = proxima_letra_primeiro_caracter
+
+            mensagem_cifrada[counter + 1] = proxima_letra_segundo_caracter
+
+        counter += 2
+
+    if decifrar:
+        print('Mensagem decifrada: ',
+              formatar_mensagem_decifrada(mensagem_cifrada))
+    else:
+        print('Mensagem cifrada: ', formatar_mensagem_cifrada(mensagem_cifrada))
+
+    return mensagem_cifrada
 
 
 def requisitar_escolha():
@@ -123,9 +247,13 @@ def requisitar_escolha():
 def main():
     alfabeto = 'Y Q D L G M J X F U V W C P B O S K R E T H N A I'
 
+    print('Alfabeto inicial: ', alfabeto)
+
     tabela_cifra = preparar_tabela_cifra(alfabeto)
 
     mensagem_a_cifrar = 'E ESTA CIFRA E INQUEBRAVEL'
+
+    print('Mensagem inicial: ', mensagem_a_cifrar)
 
     mensagem_a_cifrar = preparar_mensagem(mensagem_a_cifrar)
 
@@ -162,6 +290,13 @@ def main():
 
         if escolha == 3:
             cifrar(mensagem_a_cifrar, tabela_cifra)
+
+            escolha = requisitar_escolha()
+
+        if escolha == 4:
+            mensagem_cifrada = cifrar(mensagem_a_cifrar, tabela_cifra)
+
+            cifrar(mensagem_cifrada, tabela_cifra, decifrar=True)
 
             escolha = requisitar_escolha()
 
